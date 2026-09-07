@@ -4,8 +4,8 @@ import { StartDB } from "./src/config/database.js";
 import { UserModel } from "./src/models/user.model.js";
 import { ProfileModel } from "./src/models/profile.model.js";
 import { ArticleModel } from "./src/models/article.model.js";
-import { ArticleTagModel } from "./src/models/articleTag.model.js";
 import { TagModel } from "./src/models/tag.model.js";
+import { ArticleTagModel } from "./src/models/articleTag.model.js";
 
 
 const PORT = process.env.PORT;

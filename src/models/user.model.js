@@ -1,8 +1,8 @@
 import { sequelize } from "../config/database.js";
 import { DataTypes } from "sequelize";
 
-export const UserModel = await sequelize.define(
-  "user",
+export const UserModel = sequelize.define(
+  "User",
   {
     username: {
       type: DataTypes.STRING(20),
@@ -17,7 +17,7 @@ export const UserModel = await sequelize.define(
       validate: { isEmail: true },
     },
     password: {
-      type: DataTypes.STRING(255)
+      type: DataTypes.STRING(255),
     },
     role: {
       type: DataTypes.ENUM("user", "admin"),

@@ -1,32 +1,55 @@
-import express from "express";
+import { Router } from "express";
 
 import {
-  agregarTagAArticulo,
   obtenerTodasLasRelaciones,
-  eliminarTagDeArticulo,
+  crearRelacion,
+  actualizarRelacion,
+  eliminarRelacion,
 } from "../controllers/articleTag.controller.js";
+
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { authorizeRoles } from "../middlewares/role.middleware.js";
+import { validate } from "../middlewares/validate.js";
 
 import {
   createArticleTagValidation,
+  updateArticleTagValidation,
   articleTagIdValidation,
 } from "../middlewares/validations/articleTag.validation.js";
 
-import { validate } from "../middlewares/validate.js";
+export const articleTagRouter = Router();
 
-export const ArticleTagRouter = express.Router();
-
-ArticleTagRouter.get("/", obtenerTodasLasRelaciones);
-
-ArticleTagRouter.post(
+articleTagRouter.get(
   "/",
+  authMiddleware,
+  authorizeRoles("admin"),
+  obtenerTodasLasRelaciones,
+);
+
+articleTagRouter.post(
+  "/",
+  authMiddleware,
+  authorizeRoles("admin"),
   createArticleTagValidation,
   validate,
-  agregarTagAArticulo,
+  crearRelacion,
 );
 
-ArticleTagRouter.delete(
-  "/:articleTagId",
+articleTagRouter.put(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("admin"),
+  updateArticleTagValidation,
+  validate,
+  actualizarRelacion,
+);
+
+articleTagRouter.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("admin"),
   articleTagIdValidation,
   validate,
-  eliminarTagDeArticulo,
+  eliminarRelacion,
 );
+

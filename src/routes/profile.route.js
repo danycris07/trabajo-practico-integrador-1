@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 
 import {
   obtenerTodosLosPerfiles,
@@ -8,23 +8,53 @@ import {
   eliminarPerfil,
 } from "../controllers/profile.controller.js";
 
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { authorizeRoles } from "../middlewares/role.middleware.js";
+import { validate } from "../middlewares/validate.js";
+
 import {
   createProfileValidation,
   updateProfileValidation,
   profileIdValidation,
 } from "../middlewares/validations/profile.validation.js";
 
-import { validate } from "../middlewares/validate.js";
+export const profileRouter = Router();
 
-export const ProfileRouter = express.Router();
+profileRouter.get(
+  "/",
+  authMiddleware,
+  authorizeRoles("admin"),
+  obtenerTodosLosPerfiles,
+);
 
-ProfileRouter.get("/", obtenerTodosLosPerfiles);
+profileRouter.get(
+  "/:id",
+  authMiddleware,
+  profileIdValidation,
+  validate,
+  obtenerPerfilPorId,
+);
 
-ProfileRouter.get("/:id", profileIdValidation, validate, obtenerPerfilPorId);
+profileRouter.post(
+  "/",
+  authMiddleware,
+  createProfileValidation,
+  validate,
+  crearPerfil,
+);
 
-ProfileRouter.post("/", createProfileValidation, validate, crearPerfil);
+profileRouter.put(
+  "/:id",
+  authMiddleware,
+  updateProfileValidation,
+  validate,
+  actualizarPerfil,
+);
 
-ProfileRouter.put("/:id", updateProfileValidation, validate, actualizarPerfil);
-
-ProfileRouter.delete("/:id", profileIdValidation, validate, eliminarPerfil);
-
+profileRouter.delete(
+  "/:id",
+  authMiddleware,
+  profileIdValidation,
+  validate,
+  eliminarPerfil,
+);

@@ -4,12 +4,12 @@ import { UserModel } from "../../models/user.model.js";
 export const createUserValidation = [
   body("username")
     .trim()
-    .isString()
-    .withMessage("El username debe de ser una cadena de caracteres")
     .notEmpty()
     .withMessage("El username es obligatorio")
     .isLength({ min: 3, max: 20 })
     .withMessage("El username debe tener entre 3 y 20 caracteres")
+    .isAlphanumeric()
+    .withMessage("El username solo puede contener letras y números")
     .custom(async (username) => {
       const usuario = await UserModel.findOne({
         where: { username },
@@ -79,8 +79,8 @@ export const updateUserValidation = [
     .trim()
     .isLength({ min: 3, max: 20 })
     .withMessage("El username debe tener entre 3 y 20 caracteres")
-    .isString()
-    .withMessage("El username debe de ser una cadena de caracteres")
+    .isAlphanumeric()
+    .withMessage("El username solo puede contener letras y números")
     .custom(async (username, { req }) => {
       const usuario = await UserModel.findOne({
         where: { username },

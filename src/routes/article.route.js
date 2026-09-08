@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 
 import {
   obtenerTodosLosArticulos,
@@ -9,32 +9,49 @@ import {
   eliminarArticulo,
 } from "../controllers/article.controller.js";
 
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { validate } from "../middlewares/validate.js";
 
 import {
   createArticleValidation,
   updateArticleValidation,
   articleIdValidation,
+  userArticlesValidation,
 } from "../middlewares/validations/article.validation.js";
 
-import { userIdValidation } from "../middlewares/validations/user.validation.js";
+export const articleRouter = Router();
 
-import { validate } from "../middlewares/validate.js";
+articleRouter.get("/", obtenerTodosLosArticulos);
 
-export const ArticleRouter = express.Router();
-
-ArticleRouter.get("/", obtenerTodosLosArticulos);
-
-ArticleRouter.get(
+articleRouter.get(
   "/user/:id",
-  userIdValidation,
+  userArticlesValidation,
   validate,
   obtenerArticulosPorUsuario,
 );
 
-ArticleRouter.get("/:id", articleIdValidation, validate, obtenerArticuloPorId);
+articleRouter.get("/:id", articleIdValidation, validate, obtenerArticuloPorId);
 
-ArticleRouter.post("/", createArticleValidation, validate, crearArticulo);
+articleRouter.post(
+  "/",
+  authMiddleware,
+  createArticleValidation,
+  validate,
+  crearArticulo,
+);
 
-ArticleRouter.put("/:id", updateArticleValidation, validate, actualizarArticulo);
+articleRouter.put(
+  "/:id",
+  authMiddleware,
+  updateArticleValidation,
+  validate,
+  actualizarArticulo,
+);
 
-ArticleRouter.delete("/:id", articleIdValidation, validate, eliminarArticulo);
+articleRouter.delete(
+  "/:id",
+  authMiddleware,
+  articleIdValidation,
+  validate,
+  eliminarArticulo,
+);

@@ -4,14 +4,12 @@ import { TagModel } from "../../models/tag.model.js";
 import { ArticleTagModel } from "../../models/articleTag.model.js";
 
 export const createArticleTagValidation = [
-
   body("article_id")
     .notEmpty()
     .withMessage("El article_id es obligatorio")
     .isInt()
     .withMessage("El article_id debe ser un número entero")
     .custom(async (article_id) => {
-
       const articulo = await ArticleModel.findByPk(article_id);
 
       if (!articulo) {
@@ -26,41 +24,86 @@ export const createArticleTagValidation = [
     .withMessage("El tag_id es obligatorio")
     .isInt()
     .withMessage("El tag_id debe ser un número entero")
-    .custom(async (tag_id, { req }) => {
-
+    .custom(async (tag_id) => {
       const tag = await TagModel.findByPk(tag_id);
 
       if (!tag) {
-        throw new Error("La etiqueta no existe");
+        throw new Error("La tag no existe");
       }
 
-      const relacion = await ArticleTagModel.findOne({
-        where: {
-          article_id: req.body.article_id,
-          tag_id,
-        },
-      });
+      return true;
+    }),
 
-      if (relacion) {
-        throw new Error("La etiqueta ya está asociada al artículo");
+  body("tag_id").custom(async (tag_id, { req }) => {
+    const relacion = await ArticleTagModel.findOne({
+      where: {
+        article_id: req.body.article_id,
+        tag_id,
+      },
+    });
+
+    if (relacion) {
+      throw new Error("El artículo ya tiene esta tag");
+    }
+
+    return true;
+  }),
+];
+
+export const updateArticleTagValidation = [
+  param("id")
+    .isInt()
+    .withMessage("El ID debe ser un número entero")
+    .custom(async (id) => {
+      const relacion = await ArticleTagModel.findByPk(id);
+
+      if (!relacion) {
+        throw new Error("La relación no existe");
+      }
+
+      return true;
+    }),
+
+  body("article_id")
+    .notEmpty()
+    .withMessage("El article_id es obligatorio")
+    .isInt()
+    .withMessage("El article_id debe ser un número entero")
+    .custom(async (article_id) => {
+      const articulo = await ArticleModel.findByPk(article_id);
+
+      if (!articulo) {
+        throw new Error("El artículo no existe");
+      }
+
+      return true;
+    }),
+
+  body("tag_id")
+    .notEmpty()
+    .withMessage("El tag_id es obligatorio")
+    .isInt()
+    .withMessage("El tag_id debe ser un número entero")
+    .custom(async (tag_id) => {
+      const tag = await TagModel.findByPk(tag_id);
+
+      if (!tag) {
+        throw new Error("La tag no existe");
       }
 
       return true;
     }),
 ];
 
-
 export const articleTagIdValidation = [
-
-  param("articleTagId")
+  param("id")
     .isInt()
-    .withMessage("El articleTagId debe ser un número entero")
-    .custom(async (articleTagId) => {
-
-      const relacion = await ArticleTagModel.findByPk(articleTagId);
+    .withMessage("El ID debe ser un número entero")
+    .custom(async (id) => {
+      const relacion = await ArticleTagModel.findByPk(id);
 
       if (!relacion) {
-        throw new Error("La relación artículo-etiqueta no existe");
+        throw new Error("La relación no existe");
       }
 
       return true;

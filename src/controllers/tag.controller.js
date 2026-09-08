@@ -7,11 +7,12 @@ export const obtenerTodasLasTags = async (req, res) => {
     const tags = await TagModel.findAll();
 
     return res.status(200).json({
-      message: "Etiquetas obtenidas correctamente",
+      message: "Tags obtenidas correctamente",
       tags,
     });
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       message: "Error interno en el servidor",
     });
@@ -34,13 +35,22 @@ export const obtenerTagPorId = async (req, res) => {
       ],
     });
 
+    if (!tag) {
+      return res.status(404).json({
+        message: "Tag no encontrada",
+      });
+    }
+
     return res.status(200).json({
-      message: "Etiqueta obtenida correctamente",
+      message: "Tag obtenida correctamente",
       tag,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };
 
@@ -51,11 +61,14 @@ export const crearTag = async (req, res) => {
     await TagModel.create(dataLimpia);
 
     return res.status(201).json({
-      message: "Etiqueta creada correctamente",
+      message: "Tag creada correctamente",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };
 
@@ -65,14 +78,23 @@ export const actualizarTag = async (req, res) => {
 
     const tag = await TagModel.findByPk(id);
 
+    if (!tag) {
+      return res.status(404).json({
+        message: "Tag no encontrada",
+      });
+    }
+
     await tag.update(dataLimpia);
 
     return res.status(200).json({
-      message: "Etiqueta actualizada correctamente",
+      message: "Tag actualizada correctamente",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };
 
@@ -80,13 +102,24 @@ export const eliminarTag = async (req, res) => {
   try {
     const { id } = matchedData(req);
 
-    await TagModel.destroy({ where: { id } });
+    const tag = await TagModel.findByPk(id);
+
+    if (!tag) {
+      return res.status(404).json({
+        message: "Tag no encontrada",
+      });
+    }
+
+    await tag.destroy();
 
     return res.status(200).json({
-      message: "Etiqueta eliminada correctamente",
+      message: "Tag eliminada correctamente",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };

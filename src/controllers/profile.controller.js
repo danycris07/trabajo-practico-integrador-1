@@ -9,6 +9,7 @@ export const obtenerTodosLosPerfiles = async (req, res) => {
         {
           model: UserModel,
           as: "user",
+          attributes: ["id", "username", "email"],
         },
       ],
     });
@@ -19,6 +20,7 @@ export const obtenerTodosLosPerfiles = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       message: "Error interno en el servidor",
     });
@@ -34,9 +36,16 @@ export const obtenerPerfilPorId = async (req, res) => {
         {
           model: UserModel,
           as: "user",
+          attributes: ["id", "username", "email"],
         },
       ],
     });
+
+    if (!perfil) {
+      return res.status(404).json({
+        message: "Perfil no encontrado",
+      });
+    }
 
     return res.status(200).json({
       message: "Perfil obtenido correctamente",
@@ -44,7 +53,10 @@ export const obtenerPerfilPorId = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };
 
@@ -52,14 +64,32 @@ export const crearPerfil = async (req, res) => {
   try {
     const dataLimpia = matchedData(req);
 
-    await ProfileModel.create(dataLimpia);
+    const perfilExistente = await ProfileModel.findOne({
+      where: {
+        user_id: req.user.id,
+      },
+    });
+
+    if (perfilExistente) {
+      return res.status(400).json({
+        message: "El usuario ya tiene un perfil",
+      });
+    }
+
+    await ProfileModel.create({
+      ...dataLimpia,
+      user_id: req.user.id,
+    });
 
     return res.status(201).json({
       message: "Perfil creado correctamente",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };
 
@@ -69,6 +99,18 @@ export const actualizarPerfil = async (req, res) => {
 
     const perfil = await ProfileModel.findByPk(id);
 
+    if (!perfil) {
+      return res.status(404).json({
+        message: "Perfil no encontrado",
+      });
+    }
+
+    if (perfil.user_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "No tienes permisos para modificar este perfil",
+      });
+    }
+
     await perfil.update(dataLimpia);
 
     return res.status(200).json({
@@ -76,7 +118,10 @@ export const actualizarPerfil = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };
 
@@ -84,13 +129,30 @@ export const eliminarPerfil = async (req, res) => {
   try {
     const { id } = matchedData(req);
 
-    await ProfileModel.destroy({ where: { id } });
+    const perfil = await ProfileModel.findByPk(id);
+
+    if (!perfil) {
+      return res.status(404).json({
+        message: "Perfil no encontrado",
+      });
+    }
+
+    if (perfil.user_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "No tienes permisos para eliminar este perfil",
+      });
+    }
+
+    await perfil.destroy();
 
     return res.status(200).json({
       message: "Perfil eliminado correctamente",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error interno en el servidor" });
+
+    return res.status(500).json({
+      message: "Error interno en el servidor",
+    });
   }
 };

@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 
 import {
   obtenerTodasLasTags,
@@ -8,23 +8,45 @@ import {
   eliminarTag,
 } from "../controllers/tag.controller.js";
 
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { authorizeRoles } from "../middlewares/role.middleware.js";
+import { validate } from "../middlewares/validate.js";
+
 import {
   createTagValidation,
   updateTagValidation,
   tagIdValidation,
 } from "../middlewares/validations/tag.validation.js";
 
-import { validate } from "../middlewares/validate.js";
+export const tagRouter = Router();
 
-export const TagRouter = express.Router();
+tagRouter.get("/", obtenerTodasLasTags);
 
-TagRouter.get("/", obtenerTodasLasTags);
+tagRouter.get("/:id", tagIdValidation, validate, obtenerTagPorId);
 
-TagRouter.get("/:id", tagIdValidation, validate, obtenerTagPorId);
+tagRouter.post(
+  "/",
+  authMiddleware,
+  authorizeRoles("admin"),
+  createTagValidation,
+  validate,
+  crearTag,
+);
 
-TagRouter.post("/", createTagValidation, validate, crearTag);
+tagRouter.put(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("admin"),
+  updateTagValidation,
+  validate,
+  actualizarTag,
+);
 
-TagRouter.put("/:id", updateTagValidation, validate, actualizarTag);
-
-TagRouter.delete("/:id", tagIdValidation, validate, eliminarTag);
-
+tagRouter.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRoles("admin"),
+  tagIdValidation,
+  validate,
+  eliminarTag,
+);

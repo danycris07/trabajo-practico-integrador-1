@@ -1,5 +1,4 @@
-import express from "express";
-
+import { Router } from "express";
 import {
   obtenerTodosLosUsuarios,
   obtenerUsuarioPorId,
@@ -8,22 +7,52 @@ import {
   eliminarUsuario,
 } from "../controllers/user.controller.js";
 
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { authorizeRoles } from "../middlewares/role.middleware.js";
+import { validate } from "../middlewares/validate.js";
+
 import {
   createUserValidation,
   updateUserValidation,
   userIdValidation,
 } from "../middlewares/validations/user.validation.js";
 
-import { validate } from "../middlewares/validate.js";
+export const userRouter = Router();
 
-export const UserRouter = express.Router();
+userRouter.use(
+  authMiddleware,
+  authorizeRoles("admin"),
+);
 
-UserRouter.get("/", obtenerTodosLosUsuarios);
+userRouter.get(
+  "/",
+  obtenerTodosLosUsuarios,
+);
 
-UserRouter.get("/:id", userIdValidation, validate, obtenerUsuarioPorId);
+userRouter.get(
+  "/:id",
+  userIdValidation,
+  validate,
+  obtenerUsuarioPorId,
+);
 
-UserRouter.post("/", createUserValidation, validate, crearUsuario);
+userRouter.post(
+  "/",
+  createUserValidation,
+  validate,
+  crearUsuario,
+);
 
-UserRouter.put("/:id", updateUserValidation, validate, actualizarUsuario);
+userRouter.put(
+  "/:id",
+  updateUserValidation,
+  validate,
+  actualizarUsuario,
+);
 
-UserRouter.delete("/:id", userIdValidation, validate, eliminarUsuario);
+userRouter.delete(
+  "/:id",
+  userIdValidation,
+  validate,
+  eliminarUsuario,
+);
